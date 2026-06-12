@@ -304,6 +304,30 @@ function pickAlter(el){
   el.classList.add('picked');pickedAlter=el;userAlter=el.textContent;
 }
 
+function getSavedUser(){
+  try{var s=localStorage.getItem('nola-hq-user');return s?JSON.parse(s):null;}catch(e){return null;}
+}
+
+function saveUser(){
+  try{localStorage.setItem('nola-hq-user',JSON.stringify({name:userName,alter:userAlter}));}catch(e){}
+}
+
+function clearUser(){
+  try{localStorage.removeItem('nola-hq-user');}catch(e){}
+  location.reload();
+}
+
+function showReturningUser(){
+  document.getElementById('join-card').style.display='none';
+  var live=document.getElementById('chat-live');
+  live.style.display='block';
+  var tag=document.createElement('div');
+  tag.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:8px 12px;background:#F3EEFF;border-radius:10px;border:0.5px solid #CECBF6';
+  tag.innerHTML='<span style="font-size:12px;color:#26215C">Chatting as <strong>'+escHtml(userName)+(userAlter?' &middot; '+escHtml(userAlter):'')+'</strong></span>'
+    +'<button onclick="clearUser()" style="font-size:11px;padding:3px 9px;border-radius:20px;border:0.5px solid #CECBF6;background:#fff;color:#666;cursor:pointer">Not you?</button>';
+  live.insertBefore(tag,live.firstChild);
+}
+
 function joinChat(){
   var n=document.getElementById('uname').value.trim();
   if(!n){
@@ -312,10 +336,21 @@ function joinChat(){
     inp.focus();return;
   }
   userName=n;
+  saveUser();
   document.getElementById('join-card').style.display='none';
   document.getElementById('chat-live').style.display='block';
   initFirebaseChat();
 }
+
+window.addEventListener('DOMContentLoaded',function(){
+  var saved=getSavedUser();
+  if(saved&&saved.name){
+    userName=saved.name;
+    userAlter=saved.alter||'';
+    showReturningUser();
+    initFirebaseChat();
+  }
+});
 
 function initFirebaseChat(){
   try{
