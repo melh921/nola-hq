@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tech Area · NOLA HQ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--p:#4B0082;--pl:#F3EEFF;--pm:#CECBF6;--pd:#26215C;--g:#FFD700;--gl:#FFF3C4;--gr:#007A3D;--grl:#E8F5EE}
+body{background:#f4f2f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding:0}
+.app{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;display:flex;flex-direction:column}
+.stripe{display:flex;height:5px;flex-shrink:0}
+.sp{flex:1;background:var(--p)}.sg{flex:1;background:var(--g)}.sgr{flex:1;background:var(--gr)}
+.hero{background:var(--p);padding:1.25rem 1.25rem 1rem;flex-shrink:0}
+.hero-eye{font-size:11px;font-weight:600;color:var(--g);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.35rem}
+.hero-title{font-size:24px;font-weight:600;color:#fff;margin-bottom:0.2rem}
+.hero-sub{font-size:13px;color:rgba(255,255,255,0.7)}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:1rem}
+.hstat{background:rgba(255,255,255,0.12);border-radius:10px;padding:0.6rem;text-align:center}
+.hstat strong{display:block;font-size:17px;font-weight:600;color:var(--g)}
+.hstat span{font-size:10px;color:rgba(255,255,255,0.6)}
+.nav{display:flex;background:var(--pd);flex-shrink:0}
+.nb{flex:1;padding:11px 4px;text-align:center;font-size:11px;color:rgba(255,255,255,0.5);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.nb i{font-size:15px;display:block;margin:0 auto 3px}
+.nb.active{color:var(--g);border-bottom:2px solid var(--g);font-weight:600}
+.body{padding:1rem;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sec{display:none}.sec.active{display:block}
+.day-label{font-size:10px;font-weight:600;color:var(--p);letter-spacing:0.07em;text-transform:uppercase;margin:0.75rem 0 0.5rem;padding-bottom:4px;border-bottom:2px solid var(--pm)}
+.acard{background:#fff;border:1px solid #e8e4f0;border-radius:14px;overflow:hidden;margin-bottom:0.75rem;box-shadow:0 1px 3px rgba(75,0,130,0.06)}
+.arow{display:flex;align-items:center;gap:12px;padding:0.75rem 1rem;border-bottom:1px solid #f0edf7}
+.arow:last-child{border-bottom:none}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.avp{background:var(--pm);color:var(--pd)}.avg{background:var(--gl);color:#7a4a00}.avgr{background:var(--grl);color:var(--gr)}
+.aname{font-size:14px;font-weight:600;color:#1a1a2e}
+.adet{font-size:12px;color:#777;margin-top:1px}
+.tpill{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--pl);color:var(--pd);font-weight:600;white-space:nowrap;border:1px solid var(--pm)}
+.snote{font-size:13px;color:#666;margin-bottom:0.85rem;line-height:1.65}
+.add-btn{width:100%;margin-top:0.5rem;padding:12px;border:1.5px dashed var(--pm);border-radius:12px;background:transparent;font-size:13px;color:var(--p);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:500;-webkit-tap-highlight-color:transparent}
+.mcard{background:#fff;border:1px solid #e8e4f0;border-radius:14px;margin-bottom:0.85rem;overflow:hidden;box-shadow:0 1px 3px rgba(75,0,130,0.06)}
+.mbanner{height:5px;display:flex}
+.mbp{background:var(--p);flex:1}.mbg{background:var(--g);flex:1}.mbgr{background:var(--gr);flex:1}
+.mbody{padding:0.85rem 1rem}
+.mtitle{font-size:14px;font-weight:600;color:#1a1a2e;margin-bottom:3px}
+.mmeta{font-size:12px;color:#777;display:flex;align-items:center;gap:4px}
+.mfoot{display:flex;align-items:center;justify-content:space-between;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #f0edf7}
+.gavs{display:flex}
+.gav{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;border:2px solid #fff;margin-left:-6px}
+.gav:first-child{margin-left:0}
+.gct{font-size:12px;color:#777;margin-left:8px;line-height:24px}
+.jbtn{font-size:13px;padding:6px 16px;border-radius:20px;border:1.5px solid var(--pm);background:transparent;color:var(--p);cursor:pointer;font-weight:600;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.jbtn.joined{background:var(--p);color:var(--g);border-color:var(--p)}
+.fcard{background:#fff;border:1px solid #e8e4f0;border-radius:14px;overflow:hidden;margin-bottom:0.5rem;box-shadow:0 1px 3px rgba(75,0,130,0.06)}
+.frow{padding:0.85rem 1rem;border-bottom:1px solid #f0edf7}
+.frow:last-child{border-bottom:none}
+.fq{font-size:14px;font-weight:600;color:#1a1a2e;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;-webkit-tap-highlight-color:transparent}
+.fq i{font-size:16px;color:var(--p);transition:transform 0.2s;flex-shrink:0}
+.fq i.open{transform:rotate(180deg)}
+.fa{font-size:13px;color:#555;margin-top:0.6rem;line-height:1.7;display:none}
+.fa.open{display:block}
+.chat-wrap{display:flex;flex-direction:column;gap:0.85rem}
+.notice{background:var(--pl);border-radius:12px;padding:0.85rem 1rem;display:flex;gap:10px;align-items:flex-start;border:1px solid var(--pm)}
+.notice i{font-size:17px;color:var(--p);flex-shrink:0;margin-top:1px}
+.notice p{font-size:12px;color:var(--pd);line-height:1.6}
+.join-card{background:#fff;border:1px solid #e8e4f0;border-radius:14px;padding:1.1rem 1rem;box-shadow:0 1px 3px rgba(75,0,130,0.06)}
+.join-card h3{font-size:15px;font-weight:600;color:#1a1a2e;margin-bottom:0.75rem;display:flex;align-items:center;gap:7px}
+.join-card h3 i{color:var(--p);font-size:18px}
+.join-card input{width:100%;margin-bottom:10px;font-size:14px;padding:10px 14px;border:1px solid #ddd;border-radius:10px;outline:none;background:#fafafa}
+.join-card input:focus{border-color:var(--pm);background:#fff}
+.alter-lbl{font-size:12px;color:#666;margin-bottom:8px;font-weight:500}
+.alter-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.aopt{padding:9px 10px;border-radius:10px;border:1px solid #e0ddf5;background:#fafafa;font-size:12px;color:#555;cursor:pointer;text-align:center;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.aopt.picked{background:var(--pl);color:var(--pd);border-color:var(--pm);font-weight:600}
+.jsub{width:100%;padding:13px;border-radius:12px;background:var(--p);border:none;color:var(--g);font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.feed-card{background:#fff;border:1px solid #e8e4f0;border-radius:14px;padding:0.85rem 1rem;box-shadow:0 1px 3px rgba(75,0,130,0.06)}
+.feed-inner{min-height:160px;max-height:340px;overflow-y:auto;margin-bottom:0.85rem;display:flex;flex-direction:column;gap:0.75rem;-webkit-overflow-scrolling:touch}
+.cmsg{display:flex;gap:9px}
+.cav{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.bubble{background:var(--pl);border-radius:3px 12px 12px 12px;padding:7px 10px;font-size:13px;color:var(--pd);line-height:1.5;max-width:82%;word-break:break-word}
+.bubble-me{background:var(--p);border-radius:12px 3px 12px 12px;padding:7px 10px;font-size:13px;color:var(--g);line-height:1.5;max-width:82%;word-break:break-word}
+.me-row{display:flex;justify-content:flex-end}
+.msg-meta{font-size:10px;color:#999;margin-bottom:2px}
+.conn-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;margin-right:5px;vertical-align:middle;transition:background 0.3s}
+.conn-dot.live{background:var(--gr)}
+.conn-status{font-size:12px;color:#777}
+.input-row{display:flex;gap:8px;align-items:center}
+.input-row input{flex:1;font-size:13px;padding:10px 14px;border:1px solid #ddd;border-radius:20px;outline:none;background:#fafafa}
+.input-row input:focus{border-color:var(--pm);background:#fff}
+.send-btn{width:38px;height:38px;border-radius:50%;background:var(--p);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.send-btn i{font-size:16px;color:var(--g)}
+.err-bar{background:#fef0f0;border:1px solid #f5c6c6;border-radius:10px;padding:8px 12px;font-size:12px;color:#8b2020;display:none;margin-bottom:10px;line-height:1.5}
+.empty-state{text-align:center;padding:2rem 1rem;color:#aaa;font-size:13px}
+.empty-state i{font-size:32px;display:block;margin-bottom:8px;color:var(--pm)}
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+</head>
+<body>
+
+<div class="app">
+  <div class="stripe"><div class="sp"></div><div class="sg"></div><div class="sgr"></div></div>
+
+  <div class="hero">
+    <div class="hero-eye">FCM Technology Area</div>
+    <div class="hero-title">Tech Area · NOLA HQ</div>
+    <div class="hero-sub">FCTG USA Ball &middot; June 27&ndash;28 &middot; #Unwritten</div>
+    <div class="hero-stats">
+      <div class="hstat"><strong>17</strong><span>attending</span></div>
+      <div class="hstat"><strong>Jun 27</strong><span>ball night</span></div>
+      <div class="hstat"><strong>6pm</strong><span>doors open</span></div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nb active" onclick="showTab('arrivals',this)"><i class="ti ti-plane-arrival"></i>Arrivals</button>
+    <button class="nb" onclick="showTab('meetups',this)"><i class="ti ti-users"></i>Meetups</button>
+    <button class="nb" onclick="showTab('faq',this)"><i class="ti ti-help"></i>FAQ</button>
+    <button class="nb" onclick="showTab('chat',this)"><i class="ti ti-message-circle"></i>Chat</button>
+  </div>
+
+  <div class="body">
+
+    <!-- ARRIVALS -->
+    <div id="arrivals" class="sec active">
+      <p class="snote">Who&rsquo;s arriving when &mdash; spot ride-share windows or just know who&rsquo;s already checked in. No phone numbers needed.</p>
+      <div class="day-label">Friday June 27 &mdash; early arrivals</div>
+      <div class="acard">
+        <div class="arow"><div class="av avp">MH</div><div style="flex:1;min-width:0"><div class="aname">Melanie H &middot; The Architect</div><div class="adet">Flight details coming soon</div></div><div class="tpill">TBC</div></div>
+        <div class="arow"><div class="av avg">MD</div><div style="flex:1;min-width:0"><div class="aname">Marissa D &middot; The Closer</div><div class="adet">Flight details coming soon</div></div><div class="tpill">TBC</div></div>
+        <div class="arow"><div class="av avgr">AS</div><div style="flex:1;min-width:0"><div class="aname">August S &middot; The Debugger</div><div class="adet">Flight details coming soon</div></div><div class="tpill">TBC</div></div>
+      </div>
+      <div class="day-label">Full arrivals list coming soon</div>
+      <div class="acard">
+        <div class="arow">
+          <div class="av" style="background:#ede9f7;color:var(--pd)"><i class="ti ti-clock" style="font-size:16px"></i></div>
+          <div style="flex:1;min-width:0"><div class="aname" style="color:#888;font-weight:400">Flight details being confirmed</div><div class="adet">Check back soon &mdash; or post your arrival in chat</div></div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="showTab('chat',document.querySelectorAll('.nb')[3])">
+        <i class="ti ti-plus" style="font-size:15px"></i> Post your arrival in the group chat
+      </button>
+    </div>
+
+    <!-- MEETUPS -->
+    <div id="meetups" class="sec">
+      <p class="snote">Totally optional &mdash; tap &ldquo;I&rsquo;m in&rdquo; to join something. No pressure, no group texts.</p>
+      <div class="day-label">Saturday June 28 &mdash; before the ball</div>
+
+      <div class="mcard">
+        <div class="mbanner"><div class="mbp"></div><div class="mbg"></div><div class="mbgr"></div></div>
+        <div class="mbody">
+          <div class="mtitle">Caf&eacute; Du Monde &mdash; beignets + caf&eacute; au lait</div>
+          <div class="mmeta"><i class="ti ti-clock" style="font-size:13px"></i>&nbsp;9:00 am &middot; 800 Decatur St &middot; 45 min walk from Hilton</div>
+          <div class="mfoot">
+            <div style="display:flex;align-items:center"><div class="gavs"><div class="gav avp">MH</div><div class="gav avg">MD</div><div class="gav avgr">JK</div></div><span class="gct" id="ct1">3 going</span></div>
+            <button class="jbtn" id="jb1" onclick="toggleJoin('jb1','ct1')">I&rsquo;m in</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mcard">
+        <div class="mbanner"><div class="mbp"></div><div class="mbg"></div><div class="mbgr"></div></div>
+        <div class="mbody">
+          <div class="mtitle">French Quarter walk + oysters at Acme</div>
+          <div class="mmeta"><i class="ti ti-clock" style="font-size:13px"></i>&nbsp;12:00 pm &middot; Meet at Hilton lobby &middot; comfy shoes</div>
+          <div class="mfoot">
+            <div style="display:flex;align-items:center"><div class="gavs"><div class="gav avgr">AS</div><div class="gav avp">PR</div></div><span class="gct" id="ct2">2 going</span></div>
+            <button class="jbtn" id="jb2" onclick="toggleJoin('jb2','ct2')">I&rsquo;m in</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="day-label">Sunday June 29 &mdash; recovery brunch</div>
+
+      <div class="mcard">
+        <div class="mbanner"><div class="mbp"></div><div class="mbg"></div><div class="mbgr"></div></div>
+        <div class="mbody">
+          <div class="mtitle">Brennan&rsquo;s brunch &mdash; the classic NOLA send-off</div>
+          <div class="mmeta"><i class="ti ti-clock" style="font-size:13px"></i>&nbsp;10:30 am &middot; 417 Royal St &middot; reservation needed</div>
+          <div class="mfoot">
+            <div style="display:flex;align-items:center"><div class="gavs"><div class="gav avp">SC</div><div class="gav avg">MH</div></div><span class="gct" id="ct3">2 going</span></div>
+            <button class="jbtn" id="jb3" onclick="toggleJoin('jb3','ct3')">I&rsquo;m in</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="add-btn" onclick="showTab('chat',document.querySelectorAll('.nb')[3])">
+        <i class="ti ti-plus" style="font-size:15px"></i> Post a meetup idea in chat
+      </button>
+    </div>
+
+    <!-- FAQ -->
+    <div id="faq" class="sec">
+      <p class="snote">Everything you&rsquo;d otherwise have to dig out of the registration email.</p>
+      <div class="fcard">
+        <div class="frow"><div class="fq" onclick="toggleFaq(this)">What&rsquo;s the dress code?<i class="ti ti-chevron-down"></i></div><div class="fa">Cocktail attire or better. New Orleans in June is hot and humid &mdash; expect 85&deg;F+. You&rsquo;ll be outside briefly at wristband pickup so factor that in.</div></div>
+        <div class="frow"><div class="fq" onclick="toggleFaq(this)">Where do I get my wristband?<i class="ti ti-chevron-down"></i></div><div class="fa">Check-in opens at 4:00 pm at the Hilton New Orleans Riverside. You need it to enter the event &mdash; don&rsquo;t leave the hotel without it.</div></div>
+        <div class="frow"><div class="fq" onclick="toggleFaq(this)">What time does it start?<i class="ti ti-chevron-down"></i></div><div class="fa">Doors open 6:00 pm, runs until midnight. Most people aim to arrive 6:00&ndash;6:30 pm.</div></div>
+        <div class="frow"><div class="fq" onclick="toggleFaq(this)">Can I use staff travel for flights?<i class="ti ti-chevron-down"></i></div><div class="fa">No &mdash; flights must go through the event registration portal via Concur. Staff travel bookings won&rsquo;t be reimbursed. Log back in with confirmation number WPNG9JXFXNF to book.</div></div>
+        <div class="frow"><div class="fq" onclick="toggleFaq(this)">Hotel address?<i class="ti ti-chevron-down"></i></div><div class="fa">Hilton New Orleans Riverside &middot; 2 Poydras St &middot; New Orleans, LA 70130. Right on the Mississippi River, close to the French Quarter.</div></div>
+        <div class="frow"><div class="fq" onclick="toggleFaq(this)">How do I save this to my phone home screen?<i class="ti ti-chevron-down"></i></div><div class="fa"><strong>iPhone:</strong> Tap the Share button in Safari, then &ldquo;Add to Home Screen.&rdquo;<br><br><strong>Android:</strong> Tap the three-dot menu in Chrome, then &ldquo;Add to Home screen.&rdquo;<br><br>It will appear as an icon and open full-screen like an app &mdash; no download required.</div></div>
+        <div class="frow"><div class="fq" onclick="toggleFaq(this)">Who built this app?<i class="ti ti-chevron-down"></i></div><div class="fa">The FCM Technology Area AI Initiative Taskforce &mdash; Melanie H, Marissa, and August. Built using AI tools as a live demonstration of what the program enables. Find us at the ball if you want to know how it was made.</div></div>
+        <div class="frow"><div class="fq" onclick="toggleFaq(this)">Questions or problems?<i class="ti ti-chevron-down"></i></div><div class="fa">Event team: FCTGevents@us.fcm.travel &middot; Confirmation number: WPNG9JXFXNF</div></div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="chat" class="sec">
+      <div class="chat-wrap">
+        <div class="notice"><i class="ti ti-lock"></i><p>Tech Area only &middot; no phone numbers &middot; channel closes June 29 &middot; keep it social</p></div>
+
+        <div id="join-card" class="join-card">
+          <h3><i class="ti ti-user-plus"></i> Join the group</h3>
+          <p class="snote" style="margin-bottom:0.85rem">No account needed &mdash; just your name and an optional NOLA alter-ego.</p>
+          <input type="text" id="uname" placeholder="Your name" autocomplete="off" />
+          <div class="alter-lbl">Pick your NOLA alter-ego (optional):</div>
+          <div class="alter-grid">
+            <div class="aopt" onclick="pickAlter(this)">The Beignet Chaser</div>
+            <div class="aopt" onclick="pickAlter(this)">The Balcony Lurker</div>
+            <div class="aopt" onclick="pickAlter(this)">The Jazz Historian</div>
+            <div class="aopt" onclick="pickAlter(this)">The Late Arrival</div>
+            <div class="aopt" onclick="pickAlter(this)">The Overpackers</div>
+            <div class="aopt" onclick="pickAlter(this)">The Points Hoarder</div>
+          </div>
+          <button class="jsub" onclick="joinChat()">Join the chat</button>
+        </div>
+
+        <div id="chat-live" style="display:none">
+          <div class="conn-bar">
+            <span class="conn-status"><span class="conn-dot" id="cdot"></span><span id="cstatus">Connecting...</span></span>
+            <span style="font-size:11px;color:#999" id="online-ct"></span>
+          </div>
+          <div id="err-bar" class="err-bar"></div>
+          <div class="feed-card">
+            <div class="feed-inner" id="feed">
+              <div class="empty-state" id="empty-state"><i class="ti ti-message-circle"></i>No messages yet &mdash; say hello!</div>
+            </div>
+            <div class="input-row">
+              <input type="text" id="cinput" placeholder="Message the group..." autocomplete="off" onkeydown="if(event.key==='Enter')sendMsg()" />
+              <button class="send-btn" onclick="sendMsg()" aria-label="Send message"><i class="ti ti-send"></i></button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.min.js"></script>
+<script>
+var FB_CONFIG={
+  apiKey:"AIzaSyBHodQLLKVMtXgR5re4Vhg43xevi-7pPZM",
+  authDomain:"nola-hq-2026.firebaseapp.com",
+  databaseURL:"https://nola-hq-2026-default-rtdb.firebaseio.com",
+  projectId:"nola-hq-2026",
+  storageBucket:"nola-hq-2026.firebasestorage.app",
+  messagingSenderId:"288524113108",
+  appId:"1:288524113108:web:07b34302df2e4214195741"
+};
+
+var db=null,messagesRef=null,userName='',userAlter='',pickedAlter=null;
+
+function showTab(id,btn){
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active')});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function toggleFaq(el){
+  var a=el.nextElementSibling,i=el.querySelector('i');
+  var open=a.classList.contains('open');
+  a.classList.toggle('open',!open);
+  i.classList.toggle('open',!open);
+}
+
+function toggleJoin(btnId,ctId){
+  var btn=document.getElementById(btnId),ct=document.getElementById(ctId);
+  var n=parseInt(ct.textContent);
+  if(btn.classList.contains('joined')){btn.classList.remove('joined');btn.textContent="I'm in";ct.textContent=(n-1)+' going';}
+  else{btn.classList.add('joined');btn.textContent='Going \u2713';ct.textContent=(n+1)+' going';}
+}
+
+function pickAlter(el){
+  if(pickedAlter)pickedAlter.classList.remove('picked');
+  el.classList.add('picked');pickedAlter=el;userAlter=el.textContent;
+}
+
+function joinChat(){
+  var n=document.getElementById('uname').value.trim();
+  if(!n){
+    var inp=document.getElementById('uname');
+    inp.style.borderColor='#4B0082';inp.style.outline='2px solid rgba(75,0,130,0.2)';
+    inp.focus();return;
+  }
+  userName=n;
+  document.getElementById('join-card').style.display='none';
+  document.getElementById('chat-live').style.display='block';
+  initFirebaseChat();
+}
+
+function initFirebaseChat(){
+  try{
+    if(!firebase.apps.length)firebase.initializeApp(FB_CONFIG);
+    db=firebase.database();
+  }catch(e){
+    showErr('Could not initialise Firebase: '+e.message);return;
+  }
+  db.ref('.info/connected').on('value',function(snap){
+    var live=snap.val()===true;
+    document.getElementById('cdot').classList.toggle('live',live);
+    document.getElementById('cstatus').textContent=live?'Live':'Reconnecting...';
+  });
+  messagesRef=db.ref('nola-chat/messages');
+  messagesRef.limitToLast(60).on('child_added',function(snap){
+    var m=snap.val();if(!m||!m.text)return;
+    var empty=document.getElementById('empty-state');
+    if(empty)empty.remove();
+    appendMessage(m.name,m.alter||'',m.text,m.name===userName);
+  },function(err){
+    showErr('Chat unavailable: '+err.message+'. Try on mobile data if on corporate Wi-Fi.');
+  });
+}
+
+function appendMessage(name,alter,text,isMe){
+  var feed=document.getElementById('feed');
+  var label=name+(alter?' \u00b7 '+alter:'');
+  var colors=['avp','avg','avgr'];
+  var ci=Math.abs(hashStr(name))%3;
+  if(isMe){
+    var row=document.createElement('div');row.className='me-row';
+    var inner=document.createElement('div');inner.style.maxWidth='82%';
+    inner.innerHTML='<div class="msg-meta" style="text-align:right">'+escHtml(label)+'</div><div class="bubble-me">'+escHtml(text)+'</div>';
+    row.appendChild(inner);feed.appendChild(row);
+  }else{
+    var row=document.createElement('div');row.className='cmsg';
+    var avEl=document.createElement('div');avEl.className='cav '+colors[ci];avEl.textContent=name.substring(0,2).toUpperCase();
+    var inner=document.createElement('div');inner.style.maxWidth='82%';
+    inner.innerHTML='<div class="msg-meta">'+escHtml(label)+'</div><div class="bubble">'+escHtml(text)+'</div>';
+    row.appendChild(avEl);row.appendChild(inner);feed.appendChild(row);
+  }
+  feed.scrollTop=feed.scrollHeight;
+}
+
+function sendMsg(){
+  var inp=document.getElementById('cinput');
+  var txt=inp.value.trim();
+  if(!txt||!messagesRef)return;
+  messagesRef.push({name:userName,alter:userAlter,text:txt,ts:firebase.database.ServerValue.TIMESTAMP});
+  inp.value='';inp.focus();
+}
+
+function showErr(msg){
+  var b=document.getElementById('err-bar');
+  b.textContent=msg;b.style.display='block';
+}
+
+function escHtml(t){
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function hashStr(s){
+  var h=0;
+  for(var i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}
+  return h;
+}
+</script>
+
+</body>
+</html>
