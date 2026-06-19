@@ -221,8 +221,8 @@ body{background:#f4f2f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
       </div>
 
       <!-- Community meetups injected here -->
-      <div id="community-sat"></div>
-      <div id="community-sun"></div>
+      <div id="community-saturday"></div>
+      <div id="community-sunday"></div>
 
       <!-- Add meetup form -->
       <div class="mu-form" id="mu-form">
@@ -271,7 +271,7 @@ body{background:#f4f2f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
         <div class="frow"><div class="fq" onclick="toggleFaq(this)">What time does it start?<i class="ti ti-chevron-down"></i></div><div class="fa">Doors open 6:00 pm, runs until midnight. Most people aim to arrive 6:00&ndash;6:30 pm.</div></div>
         <div class="frow"><div class="fq" onclick="toggleFaq(this)">Can I use staff travel for flights?<i class="ti ti-chevron-down"></i></div><div class="fa">No &mdash; flights must go through the event registration portal via Concur. Staff travel won&rsquo;t be reimbursed. Log back into the registration portal to book.</div></div>
         <div class="frow"><div class="fq" onclick="toggleFaq(this)">Hotel address?<i class="ti ti-chevron-down"></i></div><div class="fa">Hilton New Orleans Riverside &middot; 2 Poydras St &middot; New Orleans, LA 70130. Right on the Mississippi River, close to the French Quarter.</div></div>
-        <div class="frow"><div class="fq" onclick="toggleFaq(this)">How do I save this to my phone home screen?<i class="ti ti-chevron-down"></i></div><div class="fa"><strong>iPhone (Safari only):</strong> Tap the Share button &rarr; tap &ldquo;Add to Home Screen&rdquo; &rarr; tap Add.<br><br><strong>Android (Chrome):</strong> Tap the three-dot menu &rarr; tap &ldquo;Add to Home screen&rdquo; &rarr; tap Add.</div></div>
+        <div class="frow"><div class="fq" onclick="toggleFaq(this)">How do I save this to my phone home screen?<i class="ti ti-chevron-down"></i></div><div class="fa"><strong style="color:#993C1D">&#9888;&#65039; Important first step:</strong> Forward this link to your personal email and open it on your phone. FCM devices default to Microsoft Edge, which won&rsquo;t let you save the app correctly.<br><br><strong>iPhone (Safari only &mdash; not Chrome, not Edge):</strong><br>1. Open the link in Safari<br>2. Tap the Share button at the bottom<br>3. Scroll down and tap &ldquo;Add to Home Screen&rdquo;<br>4. Tap Add &mdash; done<br><br><strong>Android (Chrome):</strong><br>1. Open the link in Chrome<br>2. Tap the three-dot menu &rsaquo; in the top right<br>3. Tap &ldquo;Add to Home screen&rdquo;<br>4. Tap Add &mdash; done</div></div>
         <div class="frow"><div class="fq" onclick="toggleFaq(this)">Who built this app?<i class="ti ti-chevron-down"></i></div><div class="fa">The FCM Technology Area AI Initiative Taskforce &mdash; Melanie H, Marissa, and August. Built using AI tools as a live demonstration of what the program enables. Find us at the Ball if you want to know how it was made.</div></div>
         <div class="frow"><div class="fq" onclick="toggleFaq(this)">Questions or problems?<i class="ti ti-chevron-down"></i></div><div class="fa">Event team: FCTGevents@us.fcm.travel</div></div>
       </div>
@@ -380,9 +380,27 @@ function submitMeetup(){
   if(muRef){
     muRef.push(m);
   }else{
-    m.id='mu'+Date.now();
-    renderedMu[m.id]=true;
-    renderMuCard(m);
+    if(initDB()){
+      muRef=db.ref('nola-chat/meetups');
+      muRef.on('child_added',function(snap){
+        var mu=snap.val();if(!mu)return;mu.id=snap.key;
+        if(!renderedMu[mu.id]){renderedMu[mu.id]=true;renderMuCard(mu);}
+      });
+      muRef.on('child_changed',function(snap){
+        var mu=snap.val();if(!mu)return;
+        var ct=document.getElementById('mugct-'+snap.key);
+        if(ct)ct.textContent=(mu.going||0)+' going';
+      });
+      muRef.push(m);
+    }else{
+      m.id='mu'+Date.now();
+      renderedMu[m.id]=true;
+      renderMuCard(m);
+      var errDiv=document.getElementById('mu-err');
+      errDiv.textContent='Posted locally — may not appear for others if offline.';
+      errDiv.style.display='block';
+      setTimeout(function(){errDiv.style.display='none';},4000);
+    }
   }
   document.getElementById('mu-title').value='';
   document.getElementById('mu-time').value='';
@@ -519,7 +537,7 @@ function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function hash(s){var h=0;for(var i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}return h;}
 
 /* ── INIT ── */
-window.addEventListener('DOMContentLoaded',function(){
+window.addEventListener('load',function(){
   initMeetups();
   var saved=getSaved();
   if(saved&&saved.name){
