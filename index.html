@@ -217,8 +217,43 @@ body{background:#f4f2f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',
         </div>
       </div>
 
-      <button class="add-btn" onclick="showTab('chat',document.querySelectorAll('.nb')[3])">
-        <i class="ti ti-plus" style="font-size:15px"></i> Post a meetup idea in chat
+      <div id="add-meetup-form" style="display:none;background:var(--color-background-primary);border:1px solid #e8e4f0;border-radius:14px;overflow:hidden;margin-bottom:0.85rem;box-shadow:0 1px 3px rgba(75,0,130,0.06)">
+        <div style="background:#4B0082;padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;font-weight:600;color:#FFD700">Add a meetup idea</span>
+          <button onclick="toggleAddForm()" style="background:transparent;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:18px;line-height:1;padding:0">&times;</button>
+        </div>
+        <div style="padding:0.85rem 1rem;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label style="font-size:11px;font-weight:500;color:#26215C;display:block;margin-bottom:4px">What's the plan?</label>
+            <input type="text" id="mu-title" placeholder="e.g. Jazz in the French Quarter" style="width:100%;font-size:13px;padding:9px 12px;border:1px solid #ddd;border-radius:10px;outline:none;background:#fafafa" />
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+            <div>
+              <label style="font-size:11px;font-weight:500;color:#26215C;display:block;margin-bottom:4px">Time</label>
+              <input type="text" id="mu-time" placeholder="e.g. 11:00 am" style="width:100%;font-size:13px;padding:9px 12px;border:1px solid #ddd;border-radius:10px;outline:none;background:#fafafa" />
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:500;color:#26215C;display:block;margin-bottom:4px">Day</label>
+              <select id="mu-day" style="width:100%;font-size:13px;padding:9px 12px;border:1px solid #ddd;border-radius:10px;outline:none;background:#fafafa;color:#333">
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:500;color:#26215C;display:block;margin-bottom:4px">Where?</label>
+            <input type="text" id="mu-location" placeholder="e.g. Frenchmen Street, meet at Hilton lobby" style="width:100%;font-size:13px;padding:9px 12px;border:1px solid #ddd;border-radius:10px;outline:none;background:#fafafa" />
+          </div>
+          <div id="mu-err" style="display:none;font-size:12px;color:#993C1D;background:#FAECE7;border-radius:8px;padding:6px 10px"></div>
+          <button onclick="submitMeetup()" style="width:100%;padding:11px;border-radius:12px;background:#4B0082;border:none;color:#FFD700;font-size:13px;font-weight:600;cursor:pointer">Post meetup idea</button>
+        </div>
+      </div>
+
+      <div id="dynamic-meetups-sat"></div>
+      <div id="dynamic-meetups-sun"></div>
+
+      <button class="add-btn" id="add-meetup-btn" onclick="toggleAddForm()">
+        <i class="ti ti-plus" style="font-size:15px"></i> Add your own meetup idea
       </button>
     </div>
 
@@ -361,6 +396,11 @@ function joinChat(){
 }
 
 window.addEventListener('DOMContentLoaded',function(){
+  try{
+    if(!firebase.apps.length)firebase.initializeApp(FB_CONFIG);
+    db=firebase.database();
+    initMeetupsFirebase();
+  }catch(e){}
   var saved=getSavedUser();
   if(saved&&saved.name){
     userName=saved.name;
@@ -383,6 +423,7 @@ function initFirebaseChat(){
     document.getElementById('cstatus').textContent=live?'Live':'Reconnecting...';
   });
   messagesRef=db.ref('nola-chat/messages');
+  initMeetupsFirebase();
   messagesRef.limitToLast(60).on('child_added',function(snap){
     var m=snap.val();if(!m||!m.text)return;
     var empty=document.getElementById('empty-state');
@@ -434,6 +475,101 @@ function hashStr(s){
   var h=0;
   for(var i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;}
   return h;
+}
+
+var meetupsRef=null;
+var renderedMeetupIds={};
+
+function toggleAddForm(){
+  var form=document.getElementById('add-meetup-form');
+  var btn=document.getElementById('add-meetup-btn');
+  var open=form.style.display==='block';
+  form.style.display=open?'none':'block';
+  btn.style.display=open?'flex':'none';
+  if(!open){document.getElementById('mu-title').focus();}
+}
+
+function initMeetupsFirebase(){
+  if(!db)return;
+  meetupsRef=db.ref('nola-chat/meetups');
+  meetupsRef.on('child_added',function(snap){
+    var m=snap.val();if(!m)return;
+    m.id=snap.key;
+    if(!renderedMeetupIds[m.id]){
+      renderedMeetupIds[m.id]=true;
+      renderMeetup(m);
+    }
+  });
+  meetupsRef.on('child_changed',function(snap){
+    var m=snap.val();if(!m)return;
+    m.id=snap.key;
+    var ct=document.getElementById('gct-'+m.id);
+    if(ct)ct.textContent=(m.going||0)+' going';
+  });
+}
+
+function submitMeetup(){
+  var title=document.getElementById('mu-title').value.trim();
+  var time=document.getElementById('mu-time').value.trim();
+  var day=document.getElementById('mu-day').value;
+  var loc=document.getElementById('mu-location').value.trim();
+  var err=document.getElementById('mu-err');
+  if(!title){err.textContent='Please add a title for your meetup idea.';err.style.display='block';return;}
+  err.style.display='none';
+  var meetup={title:title,time:time,day:day,location:loc,going:1,createdBy:userName||'Someone',ts:firebase.database.ServerValue.TIMESTAMP};
+  if(meetupsRef){
+    meetupsRef.push(meetup);
+  } else {
+    var id='mu'+Date.now();
+    meetup.id=id;
+    renderedMeetupIds[id]=true;
+    renderMeetup(meetup);
+  }
+  document.getElementById('mu-title').value='';
+  document.getElementById('mu-time').value='';
+  document.getElementById('mu-location').value='';
+  toggleAddForm();
+}
+
+function renderMeetup(m){
+  var container=document.getElementById('dynamic-meetups-'+(m.day||'saturday').toLowerCase());
+  if(!container)return;
+  var meta=[];
+  if(m.time)meta.push(m.time);
+  if(m.location)meta.push(m.location);
+  var metaStr=meta.join(' · ');
+  var card=document.createElement('div');
+  card.className='mcard';
+  card.id='card-'+m.id;
+  card.innerHTML='<div class="mbanner"><div class="mbp"></div><div class="mbg"></div><div class="mbgr"></div></div>'
+    +'<div class="mbody">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">'
+    +'<div class="mtitle">'+escHtml(m.title)+'</div>'
+    +'<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:#E8F5EE;color:#085041;font-weight:500;white-space:nowrap;margin-left:8px">Community</span>'
+    +'</div>'
+    +(metaStr?'<div class="mmeta"><i class="ti ti-clock" style="font-size:13px" aria-hidden="true"></i>&nbsp;'+escHtml(metaStr)+'</div>':'')
+    +(m.createdBy?'<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">Added by '+escHtml(m.createdBy)+'</div>':'')
+    +'<div class="mfoot">'
+    +'<div style="display:flex;align-items:center"><span class="gct" style="margin-left:0" id="gct-'+m.id+'">'+(m.going||1)+' going</span></div>'
+    +'<button class="jbtn" id="jbtn-'+m.id+'" onclick="toggleMeetupJoin(''+m.id+'')">I'm&nbsp;in</button>'
+    +'</div>'
+    +'</div>';
+  container.appendChild(card);
+}
+
+function toggleMeetupJoin(id){
+  var btn=document.getElementById('jbtn-'+id);
+  var ct=document.getElementById('gct-'+id);
+  var n=parseInt(ct.textContent)||0;
+  if(btn.classList.contains('joined')){
+    btn.classList.remove('joined');btn.innerHTML="I'm&nbsp;in";
+    n--;ct.textContent=n+' going';
+    if(meetupsRef)meetupsRef.child(id).update({going:n});
+  }else{
+    btn.classList.add('joined');btn.textContent='Going ✓';
+    n++;ct.textContent=n+' going';
+    if(meetupsRef)meetupsRef.child(id).update({going:n});
+  }
 }
 </script>
 
